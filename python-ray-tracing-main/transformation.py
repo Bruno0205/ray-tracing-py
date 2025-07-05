@@ -48,43 +48,27 @@ class Transformacao:
 
     @staticmethod
     def criar_matriz_escala(sx, sy, sz):
-        """
-        Creates a scaling matrix for scaling points in 3D space.
-
-        Args:
-        - sx: The scaling factor along the x-axis.
-        - sy: The scaling factor along the y-axis.
-        - sz: The scaling factor along the z-axis.
-
-        Returns:
-        - A 4x4 numpy array representing the scaling matrix.
-        """
+        # Retorna uma matriz de escala 4x4 que redimensiona um objeto.
         return np.array(
             [[sx, 0, 0, 0], [0, sy, 0, 0], [0, 0, sz, 0], [0, 0, 0, 1]], dtype=float
         )
 
     @staticmethod
     def criar_matriz_rotacao_x(angulo):
-        """
-        Creates a rotation matrix for rotating points around the x-axis.
-
-        Args:
-        - angulo: The rotation angle in radians.
-
-        Returns:
-        - A 4x4 numpy array representing the rotation matrix.
-        """
-        cos_a = math.cos(angulo)
-        sin_a = math.sin(angulo)
+       # Retorna uma matriz 4x4 para rotação em torno do eixo X.
+        cos_a = math.cos(angulo) # Pré-calcula o cosseno para eficiência.
+        sin_a = math.sin(angulo) # Pré-calcula o seno para eficiência.
         return np.array(
             [[1, 0, 0, 0], [0, cos_a, -sin_a, 0], [0, sin_a, cos_a, 0], [0, 0, 0, 1]],
             dtype=float,
         )
 
+     
     @staticmethod
     def criar_matriz_rotacao_y(angulo):
-        cos_a = math.cos(angulo)
-        sin_a = math.sin(angulo)
+        # Retorna uma matriz 4x4 para rotação em torno do eixo Y.
+        cos_a = math.cos(angulo) # Pré-calcula o cosseno para eficiência.
+        sin_a = math.sin(angulo) # Pré-calcula o seno para eficiência.
         return np.array(
             [[cos_a, 0, sin_a, 0], [0, 1, 0, 0], [-sin_a, 0, cos_a, 0], [0, 0, 0, 1]],
             dtype=float,
@@ -92,8 +76,9 @@ class Transformacao:
 
     @staticmethod
     def criar_matriz_rotacao_z(angulo):
-        cos_a = math.cos(angulo)
-        sin_a = math.sin(angulo)
+        # Retorna uma matriz 4x4 para rotação em torno do eixo Z.
+        cos_a = math.cos(angulo) # Pré-calcula o cosseno para eficiência.
+        sin_a = math.sin(angulo) # Pré-calcula o seno para eficiência.
         return np.array(
             [[cos_a, -sin_a, 0, 0], [sin_a, cos_a, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]],
             dtype=float,

@@ -87,7 +87,38 @@ def main():
 
     ray_casting.__generate_image__(entidades, 1, camera)
 
+'''
+    
+    # Criando a matriz de rotação (45 graus em torno do eixo Y)
+    # O ângulo deve ser em radianos
+    angulo_rad = math.radians(30)
+    matriz_rotacao = Transformacao.criar_matriz_rotacao_x(angulo_rad)
+    
+    # Criando a matriz de translação (mover 3 unidades para a direita)
+    #matriz_translacao = Transformacao.criar_matriz_translacao(3, 0, 0)
 
+    # Combinando as transformações: Rotação primeiro, depois Translação.
+    # A ordem da multiplicação é importante: a transformação à direita é aplicada primeiro.
+    #matriz_combinada = matriz_translacao @ matriz_rotacao
+
+    # Aplicando a matriz combinada ao nosso objeto Mesh
+    mesh_transformada = Transformacao.aplicar_transformacao_malha(mesh, matriz_rotacao)
+
+    # --- 4. RENDERIZAÇÃO DA IMAGEM "DEPOIS" ---
+    
+    print("--- Renderizando a cena TRANSFORMADA. ---")
+    ray_casting_depois = RayCasting(hres=400, vres=400)
+    entidades_depois = [mesh_transformada]
+    
+    camera = Camera(
+        target=Ponto(0, 0, 0),
+        #position=Ponto(15, -3, 10), #Camera 1
+        position=Ponto(0, 10, 5), #Camera 3
+        up=Vetor(0, -1, 0)
+    )
+    
+    ray_casting_depois.__generate_image__(entidades_depois, 1, camera)
+    #'''
 main()
 
 
