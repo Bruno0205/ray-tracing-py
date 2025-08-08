@@ -3,7 +3,7 @@ import math
 class Ponto:
     """Representa um ponto 3D"""
 
-    def __init__(self, x, y, z): #inicialização do ponto com as três coordenadas.
+    def __init__(self, x, y, z): 
         self.x = x
         self.y = y
         self.z = z
@@ -15,6 +15,10 @@ class Ponto:
 
     def __add__(self, p):
         return Ponto(self.x + p.x, self.y + p.y, self.z + p.z)
+    
+    def __mul__(self, escalar):
+        #ensina o Ponto a ser multiplicado por um número
+        return Ponto(self.x * escalar, self.y * escalar, self.z * escalar)
 
     def __sub__(self, p):
         vetor_resultado = Vetor(self.x - p.x, self.y - p.y, self.z - p.z)

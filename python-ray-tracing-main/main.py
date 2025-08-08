@@ -217,7 +217,7 @@ def main():
 
         # --- Parâmetros para Refração ---
         k_refracao=0.9,             
-        indice_refracao=0.5         
+        indice_refracao=0.5
     )
 
 
@@ -226,7 +226,7 @@ def main():
     #(zoom, cima baixo, esq e dir)
     camera1 = Camera(
         target=Ponto(10, 0, 0),
-        position=Ponto(-15, 0, 0),
+        position=Ponto(-3, 0, 0),
         up=Vetor(0, 1, 0),
     )
 
@@ -257,6 +257,6 @@ def main():
     #Exemplo 5 (3 esferas, 2 opacas e 1 de vidro, mostrando o poder da refração)
     entidades5 = [esfera_transparente, esfera_branca, esfera_roxa]
 
-    ray_casting.__generate_image__(entidades5, luzes_da_cena, 1, camera2)
+    ray_casting.__generate_image__(entidades5, luzes_da_cena, 1, camera1)
 
 main()

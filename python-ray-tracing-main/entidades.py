@@ -1,9 +1,11 @@
 
-from vectors import Ponto 
+from vectors import Ponto, Vetor
+import numpy as np
+from ray import Ray
 
 class Esfera: #Representa uma esfera 3D
     
-    # definição da esfera e seus parametros, adicionando os coeficientes do material para a Terceira Entrega
+    #definição da esfera e seus parametros, adicionando os coeficientes do material para a Terceira Entrega
     def __init__( 
         self,
         center, 
@@ -18,7 +20,7 @@ class Esfera: #Representa uma esfera 3D
         k_refracao=0.0,               
         indice_refracao=0.0,          
         ): 
-        # inicializando a esfera
+
         self.center = center 
         self.radius = radius 
         self.color = color
@@ -65,7 +67,6 @@ class Esfera: #Representa uma esfera 3D
         t1 = (-b + discriminant**0.5) / (2 * a)
         t2 = (-b - discriminant**0.5) / (2 * a)
 
-        # <<< MUDANÇA AQUI >>>
         # Lógica mais robusta para encontrar a interseção correta e na frente da câmera.
         epsilon = 0.0001
         
@@ -85,7 +86,7 @@ class Esfera: #Representa uma esfera 3D
         return None
     
 class Plane: #representa um plano 3D
-    # definição do plano e seus parametros, adicionando os coeficientes do material para a Terceira Entrega
+    #definição do plano e seus parametros, adicionando os coeficientes do material para a Terceira Entrega
     def __init__(
         self, 
         point, 
@@ -125,7 +126,6 @@ class Plane: #representa um plano 3D
             
             t = sum(n * dp for n, dp in zip(self.normal, d)) / denominator #calcula o "quanto andar" (parâmetro t) para alcançar o plano ao longo do vetor da linha
 
-            # <<< MUDANÇA AQUI >>>
             # Verifica se a interseção ocorre NA FRENTE do raio. Se t for negativo, a interseção está atrás.
             if t > 0.0001:
                 return tuple(lp + t * lv for lp, lv in zip(line_point, line_vector)) #achar as coordenadas exatas do ponto de interseção
@@ -225,4 +225,75 @@ class Mesh: #representa uma malha
                         intersection_point.y,
                         intersection_point.z,
                     )
+        return None
+    
+
+#--------------------FEATURE EXTRA
+class SuperficieRevolucao:
+    def __init__(self, color, controle_pts, k_difuso=0.8, k_especular=0.2, k_ambiental=0.2, n_rugosidade=32, k_reflexao=0.0):
+        self.color = color; self.k_difuso = k_difuso; self.k_especular = k_especular
+        self.k_ambiental = k_ambiental; self.n_rugosidade = n_rugosidade; self.k_reflexao = k_reflexao
+        self.controle_pts = [Ponto(p[0], p[1], 0) for p in controle_pts]
+        self.eixo = Vetor(0, 1, 0); self.normal_no_ponto = None
+        self.segmentos = self._gerar_segmentos(num_segmentos=50) #quanto +segmentos +demora, mas +real 
+
+    def _get_ponto_bezier(self, t):
+        pontos = self.controle_pts
+        while len(pontos) > 1:
+            pontos = [p1.__mul__(1.0 - t) + p2.__mul__(t) for p1, p2 in zip(pontos, pontos[1:])]
+        return pontos[0]
+
+    def _gerar_segmentos(self, num_segmentos=0):
+        pontos = [self._get_ponto_bezier(i / num_segmentos) for i in range(num_segmentos + 1)]
+        return [(pontos[i], pontos[i+1]) for i in range(num_segmentos)]
+
+    def __intersect_line__(self, origin, direction):
+        closest_t = float('inf')
+        final_hit_point = None
+        segmento_final = None
+
+        #iterando sobre cada fatia do objeto
+        for p1, p2 in self.segmentos:
+            
+            #cada fatia aq é um cilindro com raio médio e altura pequena
+            h = p2.y - p1.y
+            if abs(h) < 1e-6: continue #ignoramos fatias sem altura
+
+            raio_medio = (p1.x + p2.x) / 2.0
+            centro_fatia = Ponto(0, p1.y, 0)
+
+            oc = origin.__sub__(centro_fatia)
+
+            #eq de segundo grau-------
+            a = direction.x**2 + direction.z**2
+            b = 2 * (oc.x*direction.x + oc.z*direction.z)
+            c = oc.x**2 + oc.z**2 - raio_medio**2
+            
+            discriminant = b**2 - 4*a*c
+            if discriminant < 0:
+                continue
+
+            sqrt_disc = np.sqrt(discriminant)
+            if abs(a) < 1e-6: continue
+                
+            t1 = (-b - sqrt_disc) / (2*a)
+            t2 = (-b + sqrt_disc) / (2*a)
+
+            for t in [t1, t2]:
+                if 1e-4 < t < closest_t:
+                    hit_point = origin + direction.__mul_escalar__(t)
+                    #verifica se o ponto está na altura da fatia
+                    if p1.y - 1e-4 <= hit_point.y <= p2.y + 1e-4:
+                        closest_t = t
+                        final_hit_point = hit_point
+                        segmento_final = (p1, p2)
+            #eq de segundo grau-------
+
+        if final_hit_point:
+            #a normal em um cilindro sempre aponta para fora a partir do eixo Y
+            normal = Vetor(final_hit_point.x, 0, final_hit_point.z).__normalize__()
+            self.normal_no_ponto = normal
+            
+            return (final_hit_point.x, final_hit_point.y, final_hit_point.z)
+            
         return None

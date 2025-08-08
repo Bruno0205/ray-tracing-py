@@ -1,5 +1,5 @@
 import numpy as np
-from entidades import Esfera, Plane, Mesh
+from entidades import Esfera, Plane, Mesh, SuperficieRevolucao
 from vectors import Ponto, Vetor
 from fonte_de_luz import Luz
 from ray import Ray
@@ -24,7 +24,7 @@ def phong(entidade, luzes, ponto_intersec, camera_position, entidades, profundid
         return [0, 0, 0]
 
     #luz ambiente, uma claridade base na cena
-    Ia = np.array([50.0, 50.0, 50.0])
+    Ia = np.array([255, 255, 255])
     #V é o vetor p/ a camera, I é o raio incidente
     V = camera_position.__sub__(ponto_intersec).__normalize__()
     V = np.array([V.x, V.y, V.z])
@@ -34,6 +34,10 @@ def phong(entidade, luzes, ponto_intersec, camera_position, entidades, profundid
         N = ponto_intersec.__sub__(entidade.center).__normalize__()
     elif isinstance(entidade, Plane):
         N = entidade.normal.__normalize__()
+    elif isinstance(entidade, SuperficieRevolucao):
+        N = entidade.normal_no_ponto # Pega a normal que já calculamos
+    elif isinstance(entidade, Mesh):
+        N = entidade.normal_to_intersection_point.__normalize__()
     else: 
         N = entidade.normal_to_intersection_point.__normalize__()
     N = np.array([N.x, N.y, N.z])
@@ -48,7 +52,7 @@ def phong(entidade, luzes, ponto_intersec, camera_position, entidades, profundid
         #se for vidro, entra na lógica de refração/reflexão
         #cosseno do angulo de incidencia
         cos_i = np.dot(I, N)
-        n1, n2 = 1.0, entidade.indice_refracao
+        n1, n2 = 1.0, entidade.indice_refracao #raio sempre começa no vazio, que tem o índice de refração do ar/vácuo = 1
         #checa se o raio tá dentro do obj (saindo)
         if cos_i < 0:
             n1, n2 = n2, 1.0
@@ -62,7 +66,7 @@ def phong(entidade, luzes, ponto_intersec, camera_position, entidades, profundid
         ocorreu_TIR = False
 
         #---------------Parte da Refração---------------
-        #se a luz pode refratar...
+    
         if refractance > 0:
             eta = n1 / n2
             normal_calculo = N if cos_i > 0 else -N
@@ -165,17 +169,16 @@ def find_closest_intersection(ray, entidades, luzes, profundidade_reflexao, prof
     min_distance = float("inf")
     entidade_atingida, ponto_de_intersecao = None, None
     for entidade in entidades:
-        origem_tupla = (ray.origin.x, ray.origin.y, ray.origin.z)
-        direcao_tupla = (ray.direction.x, ray.direction.y, ray.direction.z)
-        intersection = entidade.__intersect_line__(origem_tupla, direcao_tupla)
+        
+        intersection = entidade.__intersect_line__(ray.origin, ray.direction)
+        
         if intersection:
             p_intersec = Ponto(intersection[0], intersection[1], intersection[2])
             distance = ray.origin.__distance__(p_intersec)
-            #acha o obj mais perto (e evita auto-interseção)
             if distance < min_distance and distance > 1e-4:
                 min_distance, entidade_atingida, ponto_de_intersecao = distance, entidade, p_intersec
-    #se achou algo, chama phong p/ saber a cor
+
     if entidade_atingida:
         return phong(entidade_atingida, luzes, ponto_de_intersecao, ray.origin, entidades, profundidade_reflexao, profundidade_refracao)
-    #se não acertou nada, retorna preto
+        
     return [0, 0, 0]
