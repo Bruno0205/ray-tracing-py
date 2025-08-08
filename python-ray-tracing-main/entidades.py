@@ -31,7 +31,6 @@ class Esfera: #Representa uma esfera 3D
         self.k_refracao = k_refracao
         self.indice_refracao = indice_refracao
 
-
     def __get_normal_vector_to_intersection_point__(self, intersection_point):
         """
         Calcula o vetor normal à superfície da esfera no ponto de interseção fornecido, que
@@ -98,7 +97,7 @@ class Plane: #representa um plano 3D
         k_transmissao=0.0,  # Coeficiente de transmissão (>= 0 e <= 1)
         n_rugosidade=0.0,  # Coeficiente de rugosidade (> 0)
         k_refracao=0.0,               
-        indice_refracao=0.0,          
+        indice_refracao=0.0,
         ): 
         # inicializando o plano
         self.point = point
@@ -110,10 +109,9 @@ class Plane: #representa um plano 3D
         self.k_reflexao = k_reflexao
         self.k_transmissao = k_transmissao
         self.n_rugosidade = n_rugosidade
-        self.k_refracao = k_refracao      
-        self.indice_refracao = indice_refracao    
-#-----------------------------------------------------------------------------
-    
+        self.k_refracao = k_refracao
+        self.indice_refracao = indice_refracao
+
     def __intersect_line__(self, line_point, line_vector): #calcula o ponto de interseção entre uma linha (definida por um ponto e um vetor direção) e o plano
             
             d = tuple(p - lp for p, lp in zip(self.point, line_point)) #vetor d que vai do ponto da linha até o ponto do plano 
@@ -151,7 +149,7 @@ class Mesh: #representa uma malha
         k_transmissao=0.0,  # Coeficiente de transmissão (>= 0 e <= 1)
         n_rugosidade=0.0,  # Coeficiente de rugosidade (> 0)
         k_refracao=0.0,               
-        indice_refracao=0.0,          
+        indice_refracao=0.0,
         normal_to_intersection_point=None,  # Vetor normal no ponto de interseção
     ):
         self.triangle_quantity = triangle_quantity
